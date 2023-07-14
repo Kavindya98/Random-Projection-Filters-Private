@@ -83,6 +83,9 @@ def get_limit(dataset):
     elif dataset == 'cifar100':
         mu = torch.tensor(cifar100_mean).view(3, 1, 1).to('cuda')
         std = torch.tensor(cifar100_std).view(3, 1, 1).to('cuda')
+    elif dataset == 'mnist':
+        mu = torch.tensor(cifar100_mean).view(3, 1, 1).to('cuda')
+        std = torch.tensor(cifar100_std).view(3, 1, 1).to('cuda')
     else:
         print('Wrong dataset:', dataset)
         exit()
