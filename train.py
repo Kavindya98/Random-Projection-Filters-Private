@@ -24,7 +24,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', default=128, type=int)
     parser.add_argument('--data_dir', default='./data/', type=str)
-    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100'])
+    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100','mnist'])
     parser.add_argument('--epochs', default=200, type=int)
     parser.add_argument('--network', default='ResNet18', type=str)
     parser.add_argument('--worker', default=4, type=int)
@@ -58,6 +58,8 @@ def main():
     args = get_args()
 
     if args.dataset == 'cifar10':
+        args.num_classes = 10
+    elif args.dataset == 'mnist':
         args.num_classes = 10
     elif args.dataset == 'cifar100':
         args.num_classes = 100
@@ -184,6 +186,7 @@ def main():
         train_loss = 0
         train_acc = 0
         train_n = 0
+
         for i, (X, y) in enumerate(train_loader):
             _iters = epoch * len(train_loader) + i
 
