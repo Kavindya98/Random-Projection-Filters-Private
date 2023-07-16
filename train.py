@@ -24,7 +24,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', default=128, type=int)
     parser.add_argument('--data_dir', default='./data/', type=str)
-    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100'])
+    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100','mnist'])
     parser.add_argument('--epochs', default=200, type=int)
     parser.add_argument('--network', default='ResNet18', type=str)
     parser.add_argument('--worker', default=4, type=int)
@@ -61,6 +61,8 @@ def main():
         args.num_classes = 10
     elif args.dataset == 'cifar100':
         args.num_classes = 100
+    elif args.dataset == 'mnist':
+        args.num_classes = 10   
     else:
         print('Wrong dataset:', args.dataset)
         exit()
@@ -116,7 +118,11 @@ def main():
     else:
         print('Wrong network:', args.network)
 
-    model = net(num_classes=args.num_classes, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
+    if args.dataset == 'mnist':
+        model = net(num_classes=args.num_classes, mnist=True, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
+                normalize=dataset_normalization).cuda()
+    else:
+        model = net(num_classes=args.num_classes, mnist=False, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
                 normalize=dataset_normalization).cuda()
 
     model = torch.nn.DataParallel(model)

@@ -214,16 +214,24 @@ class RPBottleneck(nn.Module):
 
 class ResNet(nn.Module):
     def __init__(self, block, rpblock, num_blocks, num_classes=10, rp=False, rp_block=None, rp_out_channel=0,
-                 normalize=None):
+                 normalize=None, mnist=False):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.rp = rp
         self.rp_block = rp_block
 
-        if rp and -1 in rp_block:
+        if (mnist==False) and rp and -1 in rp_block:
             self.rp_conv1 = Conv2d(3, 64 - rp_out_channel, kernel_size=3, stride=1, padding=1, bias=False)
             self.rp1 = nn.Conv2d(3, rp_out_channel, kernel_size=3, stride=1, padding=1, bias=False)
             self.rp1.weight.requires_grad = False
+        elif (mnist==True) and rp and -1 in rp_block:
+            self.rp_conv1 = Conv2d(1, 64 - rp_out_channel, kernel_size=3, stride=1, padding=1, bias=False)
+            self.rp1 = nn.Conv2d(1, rp_out_channel, kernel_size=3, stride=1, padding=1, bias=False)
+            self.rp1.weight.requires_grad = False
+        elif (mnist==True) and rp and ((-1 in rp_block)==False):
+            self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)  
+        elif (mnist==True) and (rp==False) :
+            self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)  
         else:
             self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -317,9 +325,9 @@ class ResNet(nn.Module):
         return out
 
 
-def ResNet18(num_classes=10, rp=False, rp_block=None, rp_out_channel=0, normalize=None):
+def ResNet18(num_classes=10, mnist=False, rp=False, rp_block=None, rp_out_channel=0, normalize=None):
     return ResNet(BasicBlock, BasicRPBlock, [2,2,2,2], num_classes=num_classes, rp=rp, rp_block=rp_block,
-                  rp_out_channel=rp_out_channel, normalize=normalize)
+                  rp_out_channel=rp_out_channel, normalize=normalize, mnist=mnist)
 
 def ResNet50(num_classes=10, rp=False, rp_block=None, rp_out_channel=0, normalize=None):
     return ResNet(Bottleneck, RPBottleneck, [3,4,6,3], num_classes=num_classes, rp=rp, rp_block=rp_block,

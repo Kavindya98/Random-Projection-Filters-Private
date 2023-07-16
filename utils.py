@@ -13,6 +13,9 @@ cifar10_std = (0.2471, 0.2435, 0.2616)
 cifar100_mean = (0.5071, 0.4867, 0.4408)
 cifar100_std = (0.2675, 0.2565, 0.2761)
 
+mnist_mean = (0.1307,)
+mnist_std = (0.3081,)
+
 
 class AverageMeter(object):
     """
@@ -84,8 +87,8 @@ def get_limit(dataset):
         mu = torch.tensor(cifar100_mean).view(3, 1, 1).to('cuda')
         std = torch.tensor(cifar100_std).view(3, 1, 1).to('cuda')
     elif dataset == 'mnist':
-        mu = torch.tensor(cifar100_mean).view(3, 1, 1).to('cuda')
-        std = torch.tensor(cifar100_std).view(3, 1, 1).to('cuda')
+        mu = torch.tensor(mnist_mean).view(1, 1, 1).to('cuda')
+        std = torch.tensor(mnist_std).view(1, 1, 1).to('cuda')
     else:
         print('Wrong dataset:', dataset)
         exit()
@@ -139,6 +142,17 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
                 transforms.ToTensor(),
                 transforms.Normalize(cifar10_mean, cifar10_std),
             ])
+        elif dataset == 'mnist':
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=8),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mnist_mean, mnist_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mnist_mean, mnist_std),
+            ])    
         else:
             train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -164,6 +178,17 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
             ])
             dataset_normalization = NormalizeByChannelMeanStd(
                 mean=cifar10_mean, std=cifar10_std)
+        elif dataset == 'mnist':
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=8),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+            test_transform = transforms.Compose([
+                transforms.ToTensor(),
+            ])
+            dataset_normalization = NormalizeByChannelMeanStd(
+                mean=mnist_mean, std=mnist_std)    
         else:
             train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -186,6 +211,11 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
             dir_, train=True, transform=train_transform, download=True)
         test_dataset = datasets.CIFAR100(
             dir_, train=False, transform=test_transform, download=True)
+    elif dataset == 'mnist':
+        train_dataset = datasets.MNIST(
+            dir_, train=True, transform=train_transform, download=True)
+        test_dataset = datasets.MNIST(
+            dir_, train=False, transform=test_transform, download=True)    
 
     train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset,
