@@ -16,6 +16,7 @@ from model.resnet import ResNet18, ResNet50
 from utils import evaluate_standard, evaluate_standard_rp, evaluate_pgd, evaluate_pgd_rp
 
 from utils import clamp, get_loaders, get_limit
+import wandb
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +90,15 @@ def main():
         handlers=handlers)
     logger.info(args)
 
+    run = wandb.init(
+    # Set the project where this run will be logged
+        project="server_random _projection",
+        # Track hyperparameters and run metadata
+        config={
+            "learning_rate": 0.01,
+            "epochs": 30,
+    })
+
     # set current device
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device)
     ngpus = torch.cuda.device_count()
@@ -126,6 +136,8 @@ def main():
                 normalize=dataset_normalization).cuda()
 
     model = torch.nn.DataParallel(model)
+    # device = torch.device('cuda:0')
+    # model.to(device)
     logger.info(model)
 
     # set weight decay for random projection layer
@@ -330,6 +342,8 @@ def main():
             "Test Acc of best PGD ckpt: {:.4f}".format(
                 args.device, test_loss, test_acc, pgd_loss, pgd_acc, best_pgd_acc, test_acc_best_pgd)
         )
+
+        wandb.log({ "Test Loss":test_loss,"Test Acc":test_acc,"PGD Loss":pgd_loss,"PGD Acc":pgd_acc})
 
 
     train_time = time.time()
