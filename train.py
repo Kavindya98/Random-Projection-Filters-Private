@@ -16,7 +16,8 @@ from model.resnet import ResNet18, ResNet50
 from utils import evaluate_standard, evaluate_standard_rp, evaluate_pgd, evaluate_pgd_rp
 
 from utils import clamp, get_loaders, get_limit
-
+import wandb
+wandb.login(key='d5477ab067ae677576b3859140bea5f9d7f13b4a',anonymous="never")
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def get_args():
     parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100','mnist'])
     parser.add_argument('--epochs', default=200, type=int)
     parser.add_argument('--network', default='ResNet18', type=str)
-    parser.add_argument('--worker', default=4, type=int)
+    parser.add_argument('--worker', default=2, type=int)
     parser.add_argument('--lr_schedule', default='multistep', choices=['cyclic', 'multistep', 'cosine'])
     parser.add_argument('--lr_min', default=0., type=float)
     parser.add_argument('--lr_max', default=0.1, type=float)
@@ -88,6 +89,20 @@ def main():
         level=logging.INFO,
         handlers=handlers)
     logger.info(args)
+
+    #wandb initialized
+    wandb.init(
+    # set the wandb project where this run will be logged
+    project="ramdom projection",
+    
+    # track hyperparameters and run metadata
+    config={
+    "learning_rate": 0.01,
+    "architecture": "ResNet18",
+    "dataset": "MNIST",
+    "epochs": 40,
+    }
+    )
 
     # set current device
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device)
@@ -329,10 +344,13 @@ def main():
             "Test Acc of best PGD ckpt: {:.4f}".format(
                 args.device, test_loss, test_acc, pgd_loss, pgd_acc, best_pgd_acc, test_acc_best_pgd)
         )
+        wandb.log({"Test Loss":test_loss,"Test Acc":test_acc,"PGD Loss":pgd_loss,"PGD Acc":pgd_acc, "Best PGD Acc":best_pgd_acc, "Test Acc of best PGD ckpt":test_acc_best_pgd})
+ 
 
 
     train_time = time.time()
     logger.info('Total train time: {:.4f} minutes'.format((train_time - start_train_time) / 60))
+    wandb.finish()
 
 
 if __name__ == "__main__":
