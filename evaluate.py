@@ -26,9 +26,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', default=128, type=int)
     parser.add_argument('--data_dir', default='./data/', type=str)
-    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100'])
+    parser.add_argument('--dataset', default='cifar10', choices=['cifar10', 'cifar100','mnist','svhn','usps','mnistm','syn'])
+    parser.add_argument('--train_dataset', default='cifar10', choices=['cifar10', 'cifar100','mnist','svhn','usps'])
     parser.add_argument('--network', default='ResNet18', type=str)
-    parser.add_argument('--worker', default=4, type=int)
+    parser.add_argument('--worker', default=2, type=int)
     parser.add_argument('--epsilon', default=8, type=int)
 
     parser.add_argument('--pretrain', default=None, type=str, help='path to load the pretrained model')
@@ -108,6 +109,16 @@ def main():
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
+    elif args.dataset == 'mnist':
+        args.num_classes = 10
+    elif args.dataset == 'mnistm':
+        args.num_classes = 10
+    elif args.dataset == 'svhn':
+        args.num_classes = 10   
+    elif args.dataset == 'usps':
+        args.num_classes = 10 
+    elif args.dataset == 'syn':
+        args.num_classes = 10 
     elif args.dataset == 'cifar100':
         args.num_classes = 100
     else:
@@ -127,7 +138,11 @@ def main():
     else:
         print('Wrong network:', args.network)
 
-    model = net(num_classes=args.num_classes, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
+    if args.train_dataset == 'mnist':
+        model = net(num_classes=args.num_classes, mnist=True, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
+                normalize=dataset_normalization).cuda()
+    else:
+        model = net(num_classes=args.num_classes, mnist=False, rp=args.rp, rp_block=args.rp_block, rp_out_channel=args.rp_out_channel,
                 normalize=dataset_normalization).cuda()
 
     model = torch.nn.DataParallel(model)

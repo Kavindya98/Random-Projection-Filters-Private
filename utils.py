@@ -16,6 +16,18 @@ cifar100_std = (0.2675, 0.2565, 0.2761)
 mnist_mean = (0.1307,)
 mnist_std = (0.3081,)
 
+syn_mean = (0.4632,)
+syn_std =(0.3006,)
+
+mnistm_mean = (0.4639,)
+mnistm_std = (0.2534,)
+
+svhn_mean = (0.4376821, )
+svhn_std = (0.19803012, )
+
+usps_mean = (0.2469, )
+usps_std = (0.2990, )
+
 
 class AverageMeter(object):
     """
@@ -89,6 +101,18 @@ def get_limit(dataset):
     elif dataset == 'mnist':
         mu = torch.tensor(mnist_mean).view(1, 1, 1).to('cuda')
         std = torch.tensor(mnist_std).view(1, 1, 1).to('cuda')
+    elif dataset == 'mnistm':
+        mu = torch.tensor(mnistm_mean).view(1, 1, 1).to('cuda')
+        std = torch.tensor(mnistm_std).view(1, 1, 1).to('cuda')
+    elif dataset == 'svhn':
+        mu = torch.tensor(svhn_mean).view(1, 1, 1).to('cuda')
+        std = torch.tensor(svhn_std).view(1, 1, 1).to('cuda')
+    elif dataset == 'syn':
+        mu = torch.tensor(syn_mean).view(1, 1, 1).to('cuda')
+        std = torch.tensor(syn_std).view(1, 1, 1).to('cuda')
+    elif dataset == 'usps':
+        mu = torch.tensor(usps_mean).view(1, 1, 1).to('cuda')
+        std = torch.tensor(usps_std).view(1, 1, 1).to('cuda')
     else:
         print('Wrong dataset:', dataset)
         exit()
@@ -142,6 +166,19 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
                 transforms.ToTensor(),
                 transforms.Normalize(cifar10_mean, cifar10_std),
             ])
+        elif dataset == 'syn':
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(syn_mean, syn_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+                transforms.Normalize(syn_mean, syn_std),
+            ])
         elif dataset == 'mnist':
             train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=8),
@@ -152,7 +189,59 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
             test_transform = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Normalize(mnist_mean, mnist_std),
-            ])    
+            ])
+        elif dataset == 'usps':
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=8),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(usps_mean, usps_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Pad(8),
+                transforms.ToTensor(),
+                transforms.Normalize(usps_mean, usps_std),
+            ])  
+        elif dataset == 'svhn':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(svhn_mean, svhn_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+                transforms.Normalize(svhn_mean, svhn_std),
+            ])  
+        elif dataset == 'mnistm':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mnistm_mean, mnistm_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.Pad(2),
+                transforms.ToTensor(),
+                transforms.Normalize(mnistm_mean, mnistm_std),
+            ])
+        elif dataset == 'syn':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(syn_mean, syn_std),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+                transforms.Normalize(syn_mean, syn_std),
+            ])      
         else:
             train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -188,7 +277,59 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
                 transforms.ToTensor(),
             ])
             dataset_normalization = NormalizeByChannelMeanStd(
-                mean=mnist_mean, std=mnist_std)    
+                mean=mnist_mean, std=mnist_std)
+        elif dataset == 'usps':
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=8),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Pad(8),
+                transforms.ToTensor(),
+            ])
+            dataset_normalization = NormalizeByChannelMeanStd(
+                mean=usps_mean, std=usps_std)
+        elif dataset == 'svhn':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])
+            dataset_normalization = NormalizeByChannelMeanStd(
+                mean=svhn_mean, std=svhn_std)
+        elif dataset == 'syn':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])
+            dataset_normalization = NormalizeByChannelMeanStd(
+                mean=syn_mean, std=syn_std)
+        elif dataset == 'mnistm':
+            train_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+            test_transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.Pad(2),
+                transforms.ToTensor(),
+            ])
+            dataset_normalization = NormalizeByChannelMeanStd(
+                mean=mnistm_mean, std=mnistm_std)        
         else:
             train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -215,7 +356,27 @@ def get_loaders(dir_, batch_size, dataset='cifar10', worker=4, norm=True):
         train_dataset = datasets.MNIST(
             dir_, train=True, transform=train_transform, download=True)
         test_dataset = datasets.MNIST(
-            dir_, train=False, transform=test_transform, download=True)    
+            dir_, train=False, transform=test_transform, download=True)
+    elif dataset == 'mnistm':
+        train_dataset = datasets.MNISTM(
+            dir_, train=True, transform=train_transform, download=True)
+        test_dataset = datasets.MNISTM(
+            dir_, train=False, transform=test_transform, download=True)
+    elif dataset == 'svhn':
+        train_dataset = datasets.SVHN(
+            dir_, split="train", transform=train_transform, download=True)
+        test_dataset = datasets.SVHN(
+            dir_, split="test", transform=test_transform, download=True) 
+    elif dataset == 'syn':
+        train_dataset = datasets.SYN(
+            dir_, train=True, transform=train_transform, download=True)
+        test_dataset = datasets.SYN(
+            dir_, train=False, transform=test_transform, download=True) 
+    elif dataset == 'usps':
+        train_dataset = datasets.USPS(
+            dir_, train=True, transform=train_transform, download=True)
+        test_dataset = datasets.USPS(
+            dir_, train=False, transform=test_transform, download=True) 
 
     train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset,
