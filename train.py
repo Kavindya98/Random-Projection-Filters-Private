@@ -17,7 +17,6 @@ from utils import evaluate_standard, evaluate_standard_rp, evaluate_pgd, evaluat
 
 from utils import clamp, get_loaders, get_limit
 import wandb
-wandb.login(key='d5477ab067ae677576b3859140bea5f9d7f13b4a',anonymous="never")
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +59,10 @@ def main():
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
-    elif args.dataset == 'cifar100':
-        args.num_classes = 100
     elif args.dataset == 'mnist':
-        args.num_classes = 10   
+        args.num_classes = 10
+    elif args.dataset == 'cifar100':
+        args.num_classes = 100  
     else:
         print('Wrong dataset:', args.dataset)
         exit()
@@ -141,6 +140,8 @@ def main():
                 normalize=dataset_normalization).cuda()
 
     model = torch.nn.DataParallel(model)
+    # device = torch.device('cuda:0')
+    # model.to(device)
     logger.info(model)
 
     # set weight decay for random projection layer
@@ -205,6 +206,7 @@ def main():
         train_loss = 0
         train_acc = 0
         train_n = 0
+
         for i, (X, y) in enumerate(train_loader):
             _iters = epoch * len(train_loader) + i
 
@@ -346,6 +348,8 @@ def main():
         )
         wandb.log({"Test Loss":test_loss,"Test Acc":test_acc,"PGD Loss":pgd_loss,"PGD Acc":pgd_acc, "Best PGD Acc":best_pgd_acc, "Test Acc of best PGD ckpt":test_acc_best_pgd})
  
+
+        wandb.log({ "Test Loss":test_loss,"Test Acc":test_acc,"PGD Loss":pgd_loss,"PGD Acc":pgd_acc})
 
 
     train_time = time.time()
